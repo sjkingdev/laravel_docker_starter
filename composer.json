@@ -1,0 +1,15 @@
+{
+    "name": "sjk/laravel_docker_starter",
+    "autoload": {
+        "psr-4": {
+            "Sjk\\LaravelDockerStarter\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "sjkingdev",
+            "email": "helloseanking@yahoo.com"
+        }
+    ],
+    "require": {}
+}
