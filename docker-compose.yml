@@ -1,0 +1,73 @@
+version: '3.9'
+
+services:
+  # Nginx as the web server
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "8000:80" # Expose Nginx on port 8000 of the host
+    volumes:
+      - ./nginx:/etc/nginx/conf.d # Assumes you have custom nginx config for Laravel
+      - ./public:/var/www/html # Laravel's public directory should be the root for Nginx
+    depends_on:
+      - laravel
+    networks:
+      - laravel_net
+
+  # Laravel application
+  laravel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/var/www/html
+    environment:
+      DB_HOST: db
+      DB_DATABASE: laravel_starter_db
+      DB_USERNAME: laravel
+      DB_PASSWORD: laravel
+    networks:
+      - laravel_net
+
+  # Composer service
+  composer:
+    image: composer:latest
+    volumes:
+      - .:/app
+    command: composer install --ignore-platform-reqs --no-scripts
+    depends_on:
+      - laravel
+
+  # Database
+  db:
+    image: mysql:latest
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: laravel
+      MYSQL_DATABASE: laravel_starter_db
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+    networks:
+      - laravel_net
+
+  # phpMyAdmin
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: laravel
+    networks:
+      - laravel_net
+
+networks:
+  laravel_net: # Define the network
+
+volumes:
+  db_data: # MySQL data
